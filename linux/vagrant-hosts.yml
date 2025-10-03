@@ -36,3 +36,9 @@
   ip: 192.168.76.10
   netmask: 255.255.255.0
   intnet: true
+- name: AlmaServ
+  box: bento/almalinux-10
+  memory: 1024
+  ip: 192.168.76.12
+  netmask: 255.255.255.0
+  intnet: true

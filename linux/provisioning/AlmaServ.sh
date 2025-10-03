@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-# Provisioning script for general AlmaLinux server
+# Provisioning script for generic AlmaLinux server | OpsLinux
 
 #------------------------------------------------------------------------------
 # Bash settings
@@ -33,4 +33,12 @@ source ${PROVISIONING_SCRIPTS}/common.sh
 
 log "Starting server specific provisioning tasks on ${HOSTNAME}"
 
-# TODO: insert code here, e.g. install Apache, add users, etc.
+log "Cleanup software rpc / cockpit"
+dnf -y remove rpcbind cockpit cockpit-ws
+
+log "Set the EPEL release"
+dnf -y install epel-release
+
+log "DNF cleanup"
+dnf -y clean dbcache
+dnf -y clean all
