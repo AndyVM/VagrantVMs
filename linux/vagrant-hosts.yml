@@ -32,13 +32,12 @@
 
 - name: LinuxGUI
   box: bento/debian-13
-  memory: 2048
+  memory: 2560
   ip: 192.168.76.10
   netmask: 255.255.255.0
   intnet: true
 - name: AlmaServ
   box: bento/almalinux-10
-  memory: 1024
-  ip: 192.168.76.12
-  netmask: 255.255.255.0
+  memory: 1535
   intnet: true
+  auto_config: false
