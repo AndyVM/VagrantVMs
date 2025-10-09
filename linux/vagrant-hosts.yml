@@ -38,6 +38,6 @@
   intnet: true
 - name: AlmaServ
   box: bento/almalinux-10
-  memory: 1535
+  mem: 1536
   intnet: true
   auto_config: false
