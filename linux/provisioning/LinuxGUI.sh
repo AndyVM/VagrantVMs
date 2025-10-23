@@ -27,15 +27,22 @@ export readonly PROVISIONING_FILES="${PROVISIONING_SCRIPTS}/files/${HOSTNAME}"
 readonly vm_user=hogent
 readonly vm_pass=hogent25
 
-# Set to 'yes' if debug messages should be printed.
-readonly debug_output='yes'
+#------------------------------------------------------------------------------
+# "Imports" - not used as common is for AlmaLinux systems (using dnf)
+#------------------------------------------------------------------------------
+
+# Actions/settings common to all servers
+#source ${PROVISIONING_SCRIPTS}/common.sh
 
 #------------------------------------------------------------------------------
-# Helper functions
+# Helper functions - imported from common.sh
 #------------------------------------------------------------------------------
 # Three levels of logging are provided: log (for messages you always want to
 # see), debug (for debug output that you only want to see if specified), and
 # error (obviously, for error messages).
+
+# Set to 'yes' if debug messages should be printed.
+readonly debug_output='no'
 
 # Usage: log [ARG]...
 #
@@ -87,11 +94,11 @@ apt-get -y autoremove
 
 log "Set the default desktop resolution"
 grep 1920x1080 /etc/lightdm/lightdm.conf || \
-sed -i '/^\[Seat:.*/a display-setup-script=sh -c -- "xrandr -s 1920x1080"' \
+sed -i '/^\[Seat:.*/a display-setup-script=sh -c -- "xrandr -s 1600x900"' \
 	/etc/lightdm/lightdm.conf
 systemctl restart lightdm
 
-log "Adding HoGent user"
+log "Adding a default user ${vm_user}"
 apt-get -y install whois # mkpasswd is in this package
 id -u "${vm_user}" &> /dev/null || useradd -m -g users -p $( mkpasswd -m sha-512 "${vm_pass}" ) -s /bin/bash "${vm_user}"
 usermod -aG sudo "${vm_user}"
