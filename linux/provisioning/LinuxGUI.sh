@@ -118,10 +118,23 @@ rm /root/wget.log
 apt clean
 
 #log "Compiling VBox Guest Additions"
-#mountpoint -q /media/cdrom && umount /media/cdrom
-#mount -t iso9660 -o ro /usr/share/virtualbox/VBoxGuestAdditions.iso /media/cdrom
-#sh /media/cdrom/VBoxLinuxAdditions.run --nox11
+mountpoint -q /media/cdrom && umount /media/cdrom
+mount -t iso9660 -o ro /usr/share/virtualbox/VBoxGuestAdditions.iso /media/cdrom
+#/usr/sbin/VBoxService -V
+[ "${cpu_arch}" == "amd64" ] && sh /media/cdrom/VBoxLinuxAdditions.run --nox11
+[ "${cpu_arch}" == "arm64" ] && sh /media/cdrom/VBoxLinuxAdditions-arm64.run --nox11
+# gives an exit code 2 on arm, no idea why
+umount /media/cdrom
+/usr/sbin/VBoxService -V
 
-#log "Compressing the VDI"
+### Cleanup of the VM - Manual steps
+
+##log "Compressing the VDI"
 #cat /dev/zero > zero.fill; sync; sleep 1; sync; rm -f zero.fill
+
+## Steps to compress the image afterwards
+#VBoxManage clonehd debian-13.0-aarch64-disk001.vmdk debian-13.0-aarch64-disk001.vdi --format vdi
+#VBoxManage modifyhd debian-13.0-aarch64-disk001.vdi --compact
+#rm debian-13.0-aarch64-disk001.vmdk
+#VBoxManage showvminfo linux_LinuxGUI_1761208634669_68109 | grep v1208634669_68109 --storagectl='VirtIO Controller' --port 0 --device 0 --medium debian-13.0-aarch64-disk001.vdi
 
