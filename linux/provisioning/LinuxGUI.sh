@@ -26,6 +26,8 @@ export readonly PROVISIONING_FILES="${PROVISIONING_SCRIPTS}/files/${HOSTNAME}"
 # TODO: put all variable definitions here. Tip: make them readonly if possible.
 readonly vm_user=hogent
 readonly vm_pass=hogent25
+# Establish the VMs CPU architecture
+cpu_arch=$( uname -r | cut -d- -f2 )
 
 #------------------------------------------------------------------------------
 # "Imports" - not used as common is for AlmaLinux systems (using dnf)
@@ -76,8 +78,7 @@ log "Starting server specific provisioning tasks on ${HOSTNAME}"
 
 log "Set a fixed kernel version"
 # de kernel blijft vast op 6.12.38-1; geen kernel upgrades tijdens de lessen
-apt-get -y purge linux-image-generic 
-apt-get -y purge linux-image-arm64 
+apt-get -y purge linux-image-"${cpu_arch}"
 
 log "Upgrade to latest apt" 
 apt-get update
@@ -111,6 +112,10 @@ apt-get -y install virtualbox-guest-additions-iso
 apt-get -y install build-essential dkms linux-headers-$(uname -r)
 # A dirty trick replacement to get the latest version, as Debian13 and VBox 7.2.2 are not alligned yet
 wget -O /usr/share/virtualbox/VBoxGuestAdditions.iso https://download.virtualbox.org/virtualbox/7.2.2/VBoxGuestAdditions_7.2.2.iso -o /root/wget.log
+rm /root/wget.log
+
+# Cleanup
+apt clean
 
 #log "Compiling VBox Guest Additions"
 #mountpoint -q /media/cdrom && umount /media/cdrom
