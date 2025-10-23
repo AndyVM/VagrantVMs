@@ -27,7 +27,8 @@ export readonly PROVISIONING_FILES="${PROVISIONING_SCRIPTS}/files/${HOSTNAME}"
 readonly vm_user=hogent
 readonly vm_pass=hogent25
 # Establish the VMs CPU architecture
-cpu_arch=$( uname -r | cut -d- -f2 )
+readonly cpu_arch=$( uname -r | cut -d- -f2 )
+readonly vbox_version="7.2.2"
 
 #------------------------------------------------------------------------------
 # "Imports" - not used as common is for AlmaLinux systems (using dnf)
@@ -111,7 +112,7 @@ apt-get update
 apt-get -y install virtualbox-guest-additions-iso
 apt-get -y install build-essential dkms linux-headers-$(uname -r)
 # A dirty trick replacement to get the latest version, as Debian13 and VBox 7.2.2 are not alligned yet
-wget -O /usr/share/virtualbox/VBoxGuestAdditions.iso https://download.virtualbox.org/virtualbox/7.2.2/VBoxGuestAdditions_7.2.2.iso -o /root/wget.log
+wget -O /usr/share/virtualbox/VBoxGuestAdditions.iso https://download.virtualbox.org/virtualbox/"${vbox_version}"/VBoxGuestAdditions_"${vbox_version}".iso -o /root/wget.log
 rm /root/wget.log
 
 # Cleanup
