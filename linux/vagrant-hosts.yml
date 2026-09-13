@@ -31,7 +31,7 @@
 ---
 
 - name: LinuxGUI
-  box: bento/debian-13
+  box: cloud-image/debian-13
   memory: 2560
   ip: 192.168.76.10
   netmask: 255.255.255.0

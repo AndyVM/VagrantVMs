@@ -25,10 +25,10 @@ export readonly PROVISIONING_FILES="${PROVISIONING_SCRIPTS}/files/${HOSTNAME}"
 #------------------------------------------------------------------------------
 # TODO: put all variable definitions here. Tip: make them readonly if possible.
 readonly vm_user=hogent
-readonly vm_pass=hogent25
+readonly vm_pass=hogent26
 # Establish the VMs CPU architecture
 readonly cpu_arch=$( uname -r | cut -d- -f2 )
-readonly vbox_version="7.2.2"
+readonly vbox_version="7.2.16"
 
 #------------------------------------------------------------------------------
 # "Imports" - not used as common is for AlmaLinux systems (using dnf)
@@ -78,20 +78,23 @@ error() {
 log "Starting server specific provisioning tasks on ${HOSTNAME}"
 
 log "Set a fixed kernel version"
-# de kernel blijft vast op 6.12.38-1; geen kernel upgrades tijdens de lessen
+# de kernel blijft vast op 6.12.107; geen kernel upgrades tijdens de lessen
 apt-get -y purge linux-image-"${cpu_arch}"
 
-log "Upgrade to latest apt" 
+log "Upgrade to latest apt packages"
 apt-get update
+# first update keyboard-configuration, as the whiptail it starts hangs when you do upgrade
+DEBIAN_FRONTEND=noninteractive apt-get -y install keyboard-configuration
+# ... then continue
 apt-get -y upgrade
 
 log "Installing the MATE desktop env - without libreoffice/gimp"
 apt-get -y install task-mate-desktop lightdm lightdm-gtk-greeter
 apt-get -y purge libreoffice-common gimp
-
 log "Remove some services - basically cleaning up TCP sockets"
-apt-get -y purge rpcbind
-apt-get -y purge cups cups-common
+apt-get -y purge rpcbind cups cups-common
+apt-get -y purge netplan-generator avahi-daemon exim4-daemon-light
+apt-get -y install iproute2
 apt-get -y autoremove
 
 log "Set the default desktop resolution"
@@ -105,20 +108,29 @@ apt-get -y install whois # mkpasswd is in this package
 id -u "${vm_user}" &> /dev/null || useradd -m -g users -p $( mkpasswd -m sha-512 "${vm_pass}" ) -s /bin/bash "${vm_user}"
 usermod -aG sudo "${vm_user}"
 
+# Cleanup
+log "Clean up apt"
+apt-get clean
+
+### Guest additions check
+if test -e /usr/sbin/VBoxService; then
+  log "Displaying VBox guest additions version"
+  /usr/sbin/VBoxService -V
+else
 log "Preparing VBox Guest Additions install"
 # the guest additions iso in in the non-free repo
 echo 'deb http://httpredir.debian.org/debian/ trixie non-free' > /etc/apt/sources.list.d/vboxiso.list
 apt-get update
-apt-get -y install virtualbox-guest-additions-iso
 apt-get -y install build-essential dkms linux-headers-$(uname -r)
-# A dirty trick replacement to get the latest version, as Debian13 and VBox 7.2.2 are not alligned yet
+apt-get -y install virtualbox-guest-additions-iso
+# A dirty trick replacement to get the latest version, as Debian13 and VBox 7.2.x are not alligned yet
 wget -O /usr/share/virtualbox/VBoxGuestAdditions.iso https://download.virtualbox.org/virtualbox/"${vbox_version}"/VBoxGuestAdditions_"${vbox_version}".iso -o /root/wget.log
 rm /root/wget.log
-
 # Cleanup
-apt clean
+apt-get clean
 
-#log "Compiling VBox Guest Additions"
+log "Compiling VBox Guest Additions"
+[ -d /media/cdrom ] || mkdir -p /media/cdrom
 mountpoint -q /media/cdrom && umount /media/cdrom
 mount -t iso9660 -o ro /usr/share/virtualbox/VBoxGuestAdditions.iso /media/cdrom
 #/usr/sbin/VBoxService -V
@@ -127,6 +139,7 @@ mount -t iso9660 -o ro /usr/share/virtualbox/VBoxGuestAdditions.iso /media/cdrom
 # gives an exit code 2 on arm, no idea why
 umount /media/cdrom
 /usr/sbin/VBoxService -V
+fi
 
 ### Cleanup of the VM - Manual steps
 
