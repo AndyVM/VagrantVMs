@@ -103,6 +103,10 @@ sed -i '/^\[Seat:.*/a display-setup-script=sh -c -- "xrandr -s 1600x900"' \
 	/etc/lightdm/lightdm.conf
 systemctl restart lightdm
 
+log "Time settings Europe/BXL + ntp"
+timedatectl set-timezone Europe/Brussels
+timedatectl set-ntp true
+
 log "Adding a default user ${vm_user}"
 apt-get -y install whois # mkpasswd is in this package
 id -u "${vm_user}" &> /dev/null || useradd -m -g users -p $( mkpasswd -m sha-512 "${vm_pass}" ) -s /bin/bash "${vm_user}"
@@ -146,9 +150,17 @@ fi
 ##log "Compressing the VDI"
 #cat /dev/zero > zero.fill; sync; sleep 1; sync; rm -f zero.fill
 
+## Tune settings for the basebox, apparently CloudImage didn't tune properly
+#VBoxManage modifyvm LinuxGUI --os-type=Debian13_64
+#VBoxManage modifyvm LinuxGUI --os-type=Debian13_arm64
+#VBoxManage modifyvm LinuxGUI --ioapic on
+#VBoxManage modifyvm LinuxGUI --vram=128
+#VBoxManage modifyvm LinuxGUI --description="Linux GUI VM for HoGent, AJ 2026-27; created by A. Van Maele & B. Van Vreckem"
+
+
 ## Steps to compress the image afterwards
-#VBoxManage clonehd debian-13.0-aarch64-disk001.vmdk debian-13.0-aarch64-disk001.vdi --format vdi
-#VBoxManage modifyhd debian-13.0-aarch64-disk001.vdi --compact
-#rm debian-13.0-aarch64-disk001.vmdk
-#VBoxManage showvminfo linux_LinuxGUI_1761208634669_68109 | grep v1208634669_68109 --storagectl='VirtIO Controller' --port 0 --device 0 --medium debian-13.0-aarch64-disk001.vdi
+#VBoxManage clonehd box.vmdk LinuxGUI.vdi --format vdi
+#VBoxManage modifyhd LinuxGUI.vdi --compact
+#rm box.vmdk
+#VBoxManage showvminfo linux_LinuxGUI_1761208634669_68109 | grep v1208634669_68109 --storagectl='VirtIO Controller' --port 0 --device 0 --medium LinuxGUI.vdi
 
