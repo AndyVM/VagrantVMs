@@ -55,9 +55,6 @@ error() {
 
 log '=== Starting common provisioning tasks ==='
 
-# TODO: insert common provisioning code here, e.g. install EPEL repository, add
-# users, enable SELinux, etc.
-
 log "Ensuring SELinux is active"
 
 if [ "$(getenforce)" != 'Enforcing' ]; then
@@ -74,6 +71,8 @@ dnf install -y \
     bind-utils \
     nano \
     tree
+
+dnf remove -y rpcbind chronyd
 
 log "Enabling essential services"
 
