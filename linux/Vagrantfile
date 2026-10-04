@@ -97,7 +97,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
       node.vm.hostname = host['name']
       node.vm.network :private_network, **network_options(host)
       custom_synced_folders(node.vm, host)
-      forwarded_ports(node.vm, host) 
+      forwarded_ports(node.vm, host)
 
       # Use custom login name/password if specified
       node.ssh.username = host['ssh_username'] if host.key? 'ssh_username'
@@ -110,7 +110,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         end
       end
 
-      # Add VM to a VirtualBox group
+
       node.vm.provider :virtualbox do |vb|
 	vb.customize ["modifyvm", :id, "--graphicscontroller", "vmsvga"]
 	vb.customize ["modifyvm", :id, "--paravirt-provider", "kvm"]
@@ -118,6 +118,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.cpus = host['cpus'] if host.key? 'cpus'
 	vb.name = host['name']
 
+        # Add VM to a VirtualBox group
         # WARNING: if the name of the current directory is the same as the
         # host name, this will fail.
         vb.customize ['modifyvm', :id, '--groups', PROJECT_NAME]
