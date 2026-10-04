@@ -145,22 +145,26 @@ umount /media/cdrom
 /usr/sbin/VBoxService -V
 fi
 
+exit 0
+
 ### Cleanup of the VM - Manual steps
 
-##log "Compressing the VDI"
-#cat /dev/zero > zero.fill; sync; sleep 1; sync; rm -f zero.fill
+#log "Compressing the VDI"
+cat /dev/zero > zero.fill; sync; sleep 1; sync; rm -f zero.fill
 
 ## Tune settings for the basebox, apparently CloudImage didn't tune properly
-#VBoxManage modifyvm LinuxGUI --os-type=Debian13_64
-#VBoxManage modifyvm LinuxGUI --os-type=Debian13_arm64
-#VBoxManage modifyvm LinuxGUI --ioapic on
-#VBoxManage modifyvm LinuxGUI --vram=128
-#VBoxManage modifyvm LinuxGUI --description="Linux GUI VM for HoGent, AJ 2026-27; created by A. Van Maele & B. Van Vreckem"
+VBoxManage modifyvm LinuxGUI --os-type=Debian13_64
+VBoxManage modifyvm LinuxGUI --os-type=Debian13_arm64
+VBoxManage modifyvm LinuxGUI --ioapic on
+VBoxManage modifyvm LinuxGUI --vram=128
+VBoxManage modifyvm LinuxGUI --description="Linux GUI VM for HoGent, AJ 2026-27; created by A. Van Maele & B. Van Vreckem"
 
 
 ## Steps to compress the image afterwards
-#VBoxManage clonehd box.vmdk LinuxGUI.vdi --format vdi
-#VBoxManage modifyhd LinuxGUI.vdi --compact
-#rm box.vmdk
-#VBoxManage showvminfo linux_LinuxGUI_1761208634669_68109 | grep v1208634669_68109 --storagectl='VirtIO Controller' --port 0 --device 0 --medium LinuxGUI.vdi
-
+VBoxManage showvminfo LinuxGUI | grep Location
+# -> gives you the location to go to to compress the virtual disk
+VBoxManage clonehd box.vmdk LinuxGUI.vdi --format vdi
+VBoxManage modifyhd LinuxGUI.vdi --compact
+# Now, attach this vdi instead of the vmdk:
+VBoxManage storageattach LinuxGUI --storagectl='VirtIO Controller' --port 0 --device 0 --medium LinuxGUI.vdi
+rm box.vmdk
